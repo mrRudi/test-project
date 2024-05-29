@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  database:
+    container_name: task-postgres
+    image: postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    volumes:
+      - ./data/postgres:/data/postgres
+    env_file:
+      - docker.env
+
+  adminer:
+    container_name: task-adminer
+    image: adminer
+    restart: unless-stopped
+    networks:
+      - postgres
+    depends_on:
+      - database
+    ports:
+      - 8085:8080
+
+
+  directus:
+    container_name: task-directus
+    image: directus/directus:10.10.5
+    restart: unless-stopped
+    ports:
+      - 8055:8055
+    volumes:
+      - ./data/directus/uploads:/directus/uploads
+      - ./data/directus/extensions:/directus/extensions
+      - ./data/directus/uploads:/directus/uploads
+    depends_on:
+      - database
+    networks:
+      - postgres
+    env_file:
+      - directus.env
+
+networks:
+  postgres:
